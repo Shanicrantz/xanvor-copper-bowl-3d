@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="brand/favicon.png">
+<title>XANVOR · Product review</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+  :root { --bg:#141416; --panel:#1e1e22; --text:#ece6df; --muted:#a39a90; --accent:#d9925a; --line:#34343a; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; background:var(--bg); color:var(--text); font:15px/1.4 -apple-system,Helvetica,Arial,sans-serif; }
+  .wrap { display:flex; flex-direction:column; height:100%; }
+  header { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; padding:12px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  h1 { font-size:16px; margin:0; font-weight:600; }
+  h1 span { color:var(--accent); }
+  .ctl { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px; }
+  select,button { background:#2a2a30; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 10px; font:inherit; font-size:13px; cursor:pointer; }
+  button:hover,select:hover { border-color:var(--accent); }
+  button.on { border-color:var(--accent); color:var(--accent); }
+  .size { margin-left:auto; font-variant-numeric:tabular-nums; font-size:13px; }
+  .size b { color:var(--accent); font-weight:600; }
+  .stage { flex:1; min-height:0; position:relative; }
+  model-viewer { width:100%; height:100%; background:radial-gradient(circle at 50% 40%, #2b2b30, #121214 75%); }
+  #drawing { position:absolute; inset:0; overflow:auto; padding:16px; background:var(--bg); display:none; }
+  #drawing svg { display:block; width:100%; min-width:720px; max-width:1500px; height:auto; margin:0 auto; }
+  #drawing p { max-width:1500px; margin:10px auto 0; color:var(--muted); font-size:13px; }
+  #status { position:absolute; left:16px; bottom:14px; color:var(--muted); font-size:12px; }
+  .draw #drawing { display:block; }
+  .draw #status, .draw .v3d { display:none; }
+
+  header img.logo { height:30px; display:block; }
+  .wm { position:absolute; inset:0; pointer-events:none; z-index:3; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='190'%3E%3Ctext x='24' y='110' transform='rotate(-28 150 95)' font-family='Georgia,serif' font-size='30' letter-spacing='8' fill='%23C69755' fill-opacity='.10'%3EXANVOR%3C/text%3E%3C/svg%3E"); }
+  #gate { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:16px; text-align:center; }
+  #gate img { width:min(300px,70vw); }
+  #gate form { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  #gate input { background:#2a2a30; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:9px 12px; font:inherit; width:210px; }
+  #gate button { padding:9px 16px; }
+  #msg { color:var(--muted); font-size:13px; min-height:18px; }
+</style>
+</head>
+<body>
+<div id="gate">
+  <img src="brand/xanvor-horizontal-brass-transparent.svg" alt="XANVOR">
+  <form id="f"><input id="pw" type="password" placeholder="Password" autocomplete="off" autofocus><button id="go">Open</button></form>
+  <div id="msg"></div>
+</div>
+<script>
+  const hex = h => new Uint8Array(h.match(/../g).map(b => parseInt(b, 16)));
+  const msg = document.getElementById('msg');
+  async function dec(key, url) {
+    const b = new Uint8Array(await (await fetch(url)).arrayBuffer());
+    return crypto.subtle.decrypt({ name:'AES-GCM', iv:b.slice(0, 12) }, key, b.slice(12));
+  }
+  document.getElementById('f').addEventListener('submit', async e => {
+    e.preventDefault();
+    const go = document.getElementById('go'); go.disabled = true; msg.textContent = 'Checking…';
+    try {
+      const p = await (await fetch('data/p.json')).json();
+      const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(document.getElementById('pw').value), 'PBKDF2', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey({ name:'PBKDF2', salt:hex(p.salt), iterations:p.iter, hash:'SHA-256' }, km, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+      let c;
+      try { c = JSON.parse(new TextDecoder().decode(await dec(key, 'data/c.bin'))); }
+      catch (err) { msg.textContent = 'Wrong password.'; go.disabled = false; return; }
+      document.title = 'XANVOR · ' + c.title;
+      document.body.innerHTML = c.body;
+      new Function(c.js)();
+      const st = document.getElementById('status'); st.textContent = 'Loading model…';
+      const m = await dec(key, 'data/m.bin');
+      document.getElementById('mv').src = URL.createObjectURL(new Blob([m], { type:'model/gltf-binary' }));
+    } catch (err) { msg.textContent = 'Could not open the page. Check the connection and try again.'; go.disabled = false; }
+  });
+</script>
+</body>
+</html>
