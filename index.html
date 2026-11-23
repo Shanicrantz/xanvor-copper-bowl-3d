@@ -34,6 +34,13 @@
   #drawing svg { display:block; width:100%; min-width:720px; max-width:1500px; height:auto; margin:0 auto; }
   #drawing p { max-width:1500px; margin:10px auto 0; color:var(--muted); font-size:13px; }
   #status { position:absolute; left:16px; bottom:14px; color:var(--muted); font-size:12px; }
+  .badge-info {display:none;background:var(--panel);border-top:1px solid var(--line);padding:10px 18px;overflow:auto;max-height:32vh}
+  .badge-info h2 {font-size:16px;margin:0 0 4px;color:var(--accent)}
+  .badge-info p {margin:3px 0;font-size:13px}
+  .badge-open .badge-info {display:block}
+  .badge-open .stage {min-height:120px}
+  #plate-label {background:#211813e8;color:#ffebd6;border:1px solid #b98f68;border-radius:5px;padding:4px 8px;font-size:12px;pointer-events:none;white-space:nowrap;transform:translateY(clamp(65px,14vh,130px))}
+  #plate-label[hidden] {display:none}
   .draw #drawing { display:block; }
   .draw #status, .draw .v3d { display:none; }
 
