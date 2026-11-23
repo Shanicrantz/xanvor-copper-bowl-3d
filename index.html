@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="brand/favicon.png">
-<title>XANVOR · Product review</title>
+<title>CHAGASTE Copper Dog Bowl</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="XANVOR">
+<meta property="og:title" content="CHAGASTE Copper Dog Bowl">
+<meta property="og:description" content="Interactive 3D view of the hammered copper dog bowl.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CHAGASTE Copper Dog Bowl">
+<meta name="description" content="Interactive 3D view of the hammered copper dog bowl.">
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <style>
   :root { --bg:#141416; --panel:#1e1e22; --text:#ece6df; --muted:#a39a90; --accent:#d9925a; --line:#34343a; }
@@ -43,6 +50,7 @@
 <body>
 <div id="gate">
   <img src="brand/xanvor-horizontal-brass-transparent.svg" alt="XANVOR">
+  <h1>CHAGASTE Copper Dog Bowl</h1>
   <form id="f"><input id="pw" type="password" placeholder="Password" autocomplete="off" autofocus><button id="go">Open</button></form>
   <div id="msg"></div>
 </div>
@@ -63,7 +71,7 @@
       let c;
       try { c = JSON.parse(new TextDecoder().decode(await dec(key, 'data/c.bin'))); }
       catch (err) { msg.textContent = 'Wrong password.'; go.disabled = false; return; }
-      document.title = 'XANVOR · ' + c.title;
+      document.title = c.title;
       document.body.innerHTML = c.body;
       new Function(c.js)();
       const st = document.getElementById('status'); st.textContent = 'Loading model…';
